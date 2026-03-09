@@ -30,17 +30,13 @@ type Artifact = {
   sessionPrivateKey: `0x${string}`;
   serializedPermissionApproval: string;
   createdAt: string;
-  warning?: string;
   policy?: {
-    token: string;
+    target: string;
     function: string;
-    recipient: string;
-    maxTransferPerTx: string;
-    decimals: number;
   };
 };
 
-const EXECUTOR = "0x3eD3D79c44b4ce08f874f43964649341F1912542" as const;
+const EXECUTOR = "0x3f1b308Be305b3B5359Da9C9B1d568F6c84B5a81" as const;
 const QUOTER_V2 = "0x61fFE014bA17989E743c5F6cB21bF9697530B21e" as const;
 
 const USDC = {
@@ -138,9 +134,11 @@ function normalizeQuoteResult(output: any) {
   };
 }
 
-function calcMinAmountOutCeil(quotedAmountOut: bigint, slippageBps: bigint): bigint {
-  const numerator = quotedAmountOut * (10_000n - slippageBps);
-  return (numerator + 10_000n - 1n) / 10_000n;
+function calcMinAmountOutFloor(
+  quotedAmountOut: bigint,
+  slippageBps: bigint
+): bigint {
+  return (quotedAmountOut * (10_000n - slippageBps)) / 10_000n;
 }
 
 async function main() {
@@ -149,6 +147,7 @@ async function main() {
 
   console.log("artifact loaded");
   console.log("chain:", artifact.chainName, artifact.chainId);
+  console.log("owner EOA:", artifact.ownerAddress);
   console.log("smart account:", artifact.smartAccountAddress);
   console.log("session key address:", artifact.sessionKeyAddress);
   console.log("executor:", EXECUTOR);
@@ -228,7 +227,7 @@ async function main() {
   });
 
   const quote = normalizeQuoteResult(quoteSimulation.result);
-  const minAmountOut = calcMinAmountOutCeil(quote.amountOut, SLIPPAGE_BPS);
+  const minAmountOut = calcMinAmountOutFloor(quote.amountOut, SLIPPAGE_BPS);
 
   console.log("amountIn:", AMOUNT_IN_HUMAN, USDC.symbol);
   console.log(
@@ -242,6 +241,7 @@ async function main() {
     WBTC.symbol
   );
   console.log("quoter gasEstimate:", quote.gasEstimate.toString());
+  console.log("deadline unix:", deadline.toString());
 
   const paymasterClient = createZeroDevPaymasterClient({
     chain,

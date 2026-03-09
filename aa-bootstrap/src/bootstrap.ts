@@ -28,7 +28,7 @@ import {
 import { arbitrum } from "viem/chains";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-const EXECUTOR = "0x3eD3D79c44b4ce08f874f43964649341F1912542" as const;
+const EXECUTOR = "0x3f1b308Be305b3B5359Da9C9B1d568F6c84B5a81" as const;
 
 function must(name: string): string {
   const value = process.env[name];
@@ -42,6 +42,7 @@ async function main() {
   const ZERODEV_RPC = must("ZERODEV_RPC");
   const OWNER_PRIVATE_KEY = must("OWNER_PRIVATE_KEY") as `0x${string}`;
   const ARBITRUM_RPC_URL = (process.env.ARBITRUM_RPC_URL || ZERODEV_RPC).trim();
+
   const SESSION_PRIVATE_KEY =
     ((process.env.SESSION_PRIVATE_KEY?.trim() as `0x${string}` | undefined) ||
       (generatePrivateKey() as `0x${string}`));
@@ -79,8 +80,6 @@ async function main() {
     signer: emptySessionAccount,
   });
 
-  // ここでは target + selector だけに絞る
-  // 金額やrecipient等の安全性は Executor コントラクト側で onchain 強制
   const callPolicy = toCallPolicy({
     policyVersion: CallPolicyVersion.V0_0_4,
     permissions: [

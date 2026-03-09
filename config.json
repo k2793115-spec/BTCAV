@@ -1,0 +1,7 @@
+{
+  "base_order_usd": 40.0,
+  "cycle_minutes": 5,
+  "max_daily_usd": 200.0,
+  "mode": "spot",
+  "running": true
+}
